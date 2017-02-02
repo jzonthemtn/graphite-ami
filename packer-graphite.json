@@ -30,8 +30,8 @@
       "type": "shell",
       "inline": [
         "sleep 30",
-        "sudo apt-get install graphite-web graphite-carbon",
-        "sudo apt-get install postgresql libpq-dev python-psycopg2",
+        "sudo apt-get -y install graphite-web graphite-carbon",
+        "sudo apt-get -y install postgresql libpq-dev python-psycopg2",
         "sudo -u postgres psql -c 'CREATE USER graphite WITH PASSWORD \"password\";'",
         "sudo -u postgres psql -c 'CREATE DATABASE graphite WITH OWNER graphite;'"
       ]
@@ -71,7 +71,7 @@
         "sudo mv /tmp/storage-aggregation.conf /etc/carbon/storage-aggregation.conf",
         "sudo graphite-manage syncdb",
         "sudo service carbon-cache start",
-        "sudo apt-get install -y apache2 libapache2-mod-wsgi",
+        "sudo apt-get -y install apache2 libapache2-mod-wsgi",
         "sudo a2dissite 000-default",
         "sudo cp /usr/share/graphite-web/apache2-graphite.conf /etc/apache2/sites-available",
         "sudo a2ensite apache2-graphite",
