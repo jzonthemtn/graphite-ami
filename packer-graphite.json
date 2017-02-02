@@ -2,6 +2,7 @@
   "variables": {
     "ami_name": "",
     "working_directory": "",
+    "security_group_id": "",
     "subnet": "",
     "vpc": ""
   },
@@ -16,7 +17,7 @@
       "run_tags": {
         "Name": "Creating {{user `ami_name`}} AMI"
       },
-      "security_group_id": "sg-b24e96d6",
+      "security_group_id": "{{user `security_group_id`}}",
       "source_ami": "ami-6edd3078",
       "ssh_username": "ubuntu",
       "subnet_id": "{{user `subnet_id`}}",
