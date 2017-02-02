@@ -1,0 +1,83 @@
+{
+  "variables": {
+    "ami_name": "",
+    "working_directory": "",
+    "subnet": "",
+    "vpc": ""
+  },
+  "builders": [
+    {
+      "name": "graphite-ubuntu",
+      "type": "amazon-ebs",
+      "ami_name": "{{user `ami_name`}}",
+      "ami_description": "{{user `ami_name`}}",
+      "instance_type": "t2.nano",
+      "region": "us-east-1",
+      "run_tags": {
+        "Name": "Creating {{user `ami_name`}} AMI"
+      },
+      "security_group_id": "sg-b24e96d6",
+      "source_ami": "ami-6edd3078",
+      "ssh_username": "ubuntu",
+      "subnet_id": "{{user `subnet_id`}}",
+      "tags": {
+        "Name": "{{user `ami_name`}}"
+      },
+      "vpc_id": "{{user `vpc_id`}}"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+        "sleep 30",
+        "sudo apt-get install graphite-web graphite-carbon",
+        "sudo apt-get install postgresql libpq-dev python-psycopg2",
+        "sudo -u postgres psql -c 'CREATE USER graphite WITH PASSWORD \"password\";'",
+        "sudo -u postgres psql -c 'CREATE DATABASE graphite WITH OWNER graphite;'"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "{{user `working_directory`}}/local_settings.py",
+      "destination": "/tmp/local_settings.py"
+    },
+    {
+      "type": "file",
+      "source": "{{user `working_directory`}}/graphite-carbon",
+      "destination": "/tmp/graphite-carbon"
+    },
+    {
+      "type": "file",
+      "source": "{{user `working_directory`}}/carbon.conf",
+      "destination": "/tmp/carbon/carbon.conf"
+    },
+    {
+      "type": "file",
+      "source": "{{user `working_directory`}}/storage-schemas.conf",
+      "destination": "/tmp/storage-schemas.conf"
+    },
+    {
+      "type": "file",
+      "source": "{{user `working_directory`}}/storage-aggregation.conf",
+      "destination": "/tmp/storage-aggregation.conf"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "sudo mv /tmp/local_settings.py /etc/graphite/local_settings.py",
+        "sudo mv /tmp/graphite-carbon /etc/default/graphite-carbon",
+        "sudo mv /tmp/carbon.conf /etc/carbon/carbon.conf",
+        "sudo mv /tmp/storage-schemas.conf /etc/carbon/storage-schemas.conf",
+        "sudo mv /tmp/storage-aggregation.conf /etc/carbon/storage-aggregation.conf",
+        "sudo graphite-manage syncdb",
+        "sudo service carbon-cache start",
+        "sudo apt-get install -y apache2 libapache2-mod-wsgi",
+        "sudo a2dissite 000-default",
+        "sudo cp /usr/share/graphite-web/apache2-graphite.conf /etc/apache2/sites-available",
+        "sudo a2ensite apache2-graphite",
+        "sudo service apache2 restart"
+      ]
+    }
+  ]
+}
