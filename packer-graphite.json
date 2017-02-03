@@ -30,10 +30,11 @@
       "type": "shell",
       "inline": [
         "sleep 30",
+	"sudo apt-get update",
 	"sudo DEBIAN_FRONTEND=noninteractive apt-get -q -y --force-yes install graphite-web graphite-carbon",
         "sudo apt-get -y install postgresql libpq-dev python-psycopg2",
-        "sudo -u postgres psql -c 'CREATE USER graphite WITH PASSWORD \"password\";'",
-        "sudo -u postgres psql -c 'CREATE DATABASE graphite WITH OWNER graphite;'"
+        "sudo -u postgres psql -c \"CREATE USER graphite WITH PASSWORD 'password';\"",
+        "sudo -u postgres psql -c \"CREATE DATABASE graphite WITH OWNER graphite;\""
       ]
     },
     {
@@ -49,7 +50,7 @@
     {
       "type": "file",
       "source": "{{user `working_directory`}}/carbon.conf",
-      "destination": "/tmp/carbon/carbon.conf"
+      "destination": "/tmp/carbon.conf"
     },
     {
       "type": "file",
@@ -69,7 +70,9 @@
         "sudo mv /tmp/carbon.conf /etc/carbon/carbon.conf",
         "sudo mv /tmp/storage-schemas.conf /etc/carbon/storage-schemas.conf",
         "sudo mv /tmp/storage-aggregation.conf /etc/carbon/storage-aggregation.conf",
-        "sudo graphite-manage syncdb",
+	"cd /usr/lib/python2.7/dist-packages/graphite",
+	"sudo python manage.py migrate auth",
+        "sudo graphite-manage syncdb --noinput",
         "sudo service carbon-cache start",
         "sudo apt-get -y install apache2 libapache2-mod-wsgi",
         "sudo a2dissite 000-default",
